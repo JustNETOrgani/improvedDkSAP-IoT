@@ -1,9 +1,13 @@
 <template>
   <div class="header">
-    <img class="logo" src="../../assets/imgs/DkSAPimg.png" />
-    <div class="menu">
-      <p id="appHeadingOne">Improved Dual-key Stealth Address Protocol for IoT</p>
-    </div>
+    <el-row>
+      <el-col :span="3" :offset="1">
+        <img class="logo" src="../../assets/imgs/DkSAPimg.png" />
+      </el-col>
+      <el-col :span="18" :offset="1">
+        <p id="appHeadingOne">Encryption and decentralized storage-based Dual-key Stealth Address Protocol for IoT</p>
+      </el-col>
+    </el-row>
 </div>
 </template>
 
@@ -30,7 +34,9 @@ export default {
   background-color: #ffffff;
 }
 .logo {
-  height: 3rem;
+  height: 5rem;
+  width: 7rem;
+  float: left;
 }
 
 #appHeadingOne{
@@ -38,5 +44,6 @@ export default {
     font-size: 2rem;
     font-family: sans-serif;
     margin: 0.5% auto;
+    text-align: center;
 }
 </style>

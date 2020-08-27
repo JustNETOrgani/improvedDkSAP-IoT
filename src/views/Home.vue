@@ -78,13 +78,10 @@ export default {
     },
     pushToIPFShub (encryptedData) {
       // var encryptedDataToSendToJviaIPFS = JSON.stringify({ encryptedData })
-      // console.log('Connecting to IPFS.')
+      console.log('Connecting to IPFS.')
       const MyBuffer = window.Ipfs.Buffer
       var dataToBuffer = MyBuffer.from(encryptedData)
-      // console.log('Buffer conversion done.')
       Myipfs.add(dataToBuffer).then(res => {
-        // console.log('Response object from IPFS: ', res)
-        // console.log('Returned hash: ', res[0].hash)
         console.log('Data upload to IPFS sucessful')
         this.loadingData = false
         // this.$message('File upload success.')
@@ -94,26 +91,24 @@ export default {
       })
     },
     publishToIPNS (returnedHash) {
-      console.log('Publishing to IPNS')
-      Myipfs.on('ready', () => {
-        Myipfs.name.publish(returnedHash).then(res => {
-          console.log('IPNS Success!')
-          const ipnsHash = res.name // This should be same as Peer ID. All users must point to this.
-          console.log('IPNS address is:', ipnsHash)
-          this.$alert('Successful initialization.', 'State of protocol initialization.', {
-            confirmButtonText: 'OK',
-            callback: action => {
-              this.$message({
-                type: 'info',
-                message: `action: ${action}`
-              })
-            }
-          })
-          // change route to transactions page.
-          this.$router.push('/transactions')
-        }).catch((err) => {
-          console.log('IPNS error.', err)
+      console.log('Connecting to IPNS')
+      Myipfs.name.publish(returnedHash).then(res => {
+        console.log('IPNS Success!')
+        const ipnsHash = res.name // This should be same as Peer ID. All users must point to this.
+        console.log('IPNS address is:', ipnsHash)
+        this.$alert('Successful initialization. Your IPNS address is ' + ipnsHash, 'State of protocol initialization.', {
+          confirmButtonText: 'OK',
+          callback: action => {
+            this.$message({
+              type: 'info',
+              message: `action: ${action}`
+            })
+          }
         })
+        // change route to transactions page.
+        this.$router.push('/transactions')
+      }).catch((err) => {
+        console.log('IPNS error.', err)
       })
     }
   }

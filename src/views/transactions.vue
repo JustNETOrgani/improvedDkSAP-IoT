@@ -70,12 +70,12 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="12" :offset="1">
-              <div v-if="decryptedData" v-loading="decryptedDataLoading">
+            <el-col :span="21" :offset="1">
+              <div id="decryptedTableDiv" v-if="decryptedData" v-loading="decryptedDataLoading">
                   <el-table
                   :data="pageTableData"
                   style="width: 100%"
-                  height="400px"
+                  height="200px"
                   >
                   <!--Building table body-->
                   <template v-for="(item, index) in decryptedDataTableLabel">
@@ -142,9 +142,9 @@ export default {
         { label: 'Encrypted data', prop: 'encryptedDataRetrieved', width: '680px' }
       ],
       decryptedDataTableLabel: [
-        { label: 'Message or Coin', prop: 'msgsOrCoin', width: '100px' },
-        { label: 'Shared Secret', prop: 'sharedSecret', width: '120px' },
-        { label: 'Counter', prop: 'counter', width: '50px' },
+        { label: 'Message or Coin', prop: 'msgsOrCoin', width: '200px' },
+        { label: 'Shared Secret', prop: 'sharedSecret', width: '160px' },
+        { label: 'Counter', prop: 'counter', width: '90px' },
         { label: 'Receiver', prop: 'receiver', width: '130px' }
       ]
     }
@@ -346,6 +346,7 @@ export default {
                     this.pageTableData[i].receiver = BytesString.data[i]
                     this.getUserDataLoading = false
                     this.decryptedDataLoading = false
+                    this.decryptedData = true
                   }
                 } else {
                   this.getUserDataLoading = false
@@ -392,5 +393,9 @@ export default {
 
 #btnGetData{
   margin-top: 1rem;
+}
+
+#decryptedTableDiv{
+  margin-top: 1.5rem;
 }
 </style>

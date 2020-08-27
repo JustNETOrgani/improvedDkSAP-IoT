@@ -20,7 +20,7 @@
                   label-width="110px"
                 >
                   <el-col :span="16">
-                    <el-form-item label="Received Message" prop="msg">
+                    <el-form-item label="Received Message or Coin" prop="msg">
                       <el-input v-model="receivedTnx.msg" placeholder="Please enter message received."></el-input>
                     </el-form-item>
                     <el-form-item label="Shared secret" prop="sharedsecret">
@@ -42,7 +42,53 @@
       </el-col>
       <el-col :span="10" :offset="2">
         <div class="tnxContainers" id="rightContainer">
-          <h4>Data recovery</h4>
+          <el-row>
+            <el-col :span="5" :offset="6">
+              <h3>Data recovery</h3>
+            </el-col>
+            <el-col :span="6" :offset="2">
+              <el-button id="btnGetData" type="primary" plain icon="el-icon-download" :loading="getUserDataLoading" @click="getUserData()">Get data</el-button>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="21" :offset="1">
+              <div v-if="encryptedData" v-loading="encryptedDataLoading">
+                <el-table
+                  :data="tableData"
+                  style="width: 100%"
+                  height="200px">
+                  <!--Building table body-->
+                  <template v-for="(item, index) in encryptedDataTableLabel">
+                    <el-table-column
+                      :key="index"
+                      :prop="item.prop"
+                      :label="item.label" :width="item.width">
+                    </el-table-column>
+                  </template>
+                </el-table>
+              </div>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12" :offset="1">
+              <div v-if="decryptedData" v-loading="decryptedDataLoading">
+                  <el-table
+                  :data="pageTableData"
+                  style="width: 100%"
+                  height="400px"
+                  >
+                  <!--Building table body-->
+                  <template v-for="(item, index) in decryptedDataTableLabel">
+                    <el-table-column
+                      :key="index"
+                      :prop="item.prop"
+                      :label="item.label" :width="item.width">
+                    </el-table-column>
+                  </template>
+                </el-table>
+              </div>
+            </el-col>
+          </el-row>
         </div>
       </el-col>
     </el-row>
@@ -69,10 +115,18 @@ export default {
       },
       labelPosition: 'top',
       recipientProcessesLoading: false,
+      getUserDataLoading: false,
+      encryptedData: false,
+      encryptedDataLoading: false,
+      decryptedData: false,
+      decryptedDataLoading: false,
+      userEncryptedMobileData: '',
+      pageTableData: [],
+      tableData: [],
       rules: {
         msg: [
-          { required: true, message: 'Please input received message', trigger: 'blur' },
-          { min: 2, message: 'Length should be at least 2', trigger: 'blur' }
+          { required: true, message: 'Please input received message or coin', trigger: 'blur' },
+          { min: 1, message: 'Length should be at least 1', trigger: 'blur' }
         ],
         sharedsecret: [
           { required: true, message: 'Please input shared secret', trigger: 'blur' },
@@ -82,12 +136,26 @@ export default {
           { required: true, message: 'Address must be in hex and legnth of 5', trigger: 'blur' },
           { min: 5, message: 'Must be in hex and length 5', trigger: 'blur' }
         ]
-      }
+      },
+      // Table labels begin.
+      encryptedDataTableLabel: [
+        { label: 'Encrypted data', prop: 'encryptedDataRetrieved', width: '680px' }
+      ],
+      decryptedDataTableLabel: [
+        { label: 'Message or Coin', prop: 'msgsOrCoin', width: '100px' },
+        { label: 'Shared Secret', prop: 'sharedSecret', width: '120px' },
+        { label: 'Counter', prop: 'counter', width: '50px' },
+        { label: 'Receiver', prop: 'receiver', width: '130px' }
+      ]
     }
   },
   components: {
     Head,
     Footer
+  },
+  created () {
+    this.encryptedData = false
+    this.decryptedData = false
   },
   methods: {
     submitForm (formName) {
@@ -96,12 +164,12 @@ export default {
           this.recipientProcessesLoading = true
           if (valid) {
             console.log('Form validations passed.')
-            var data = {
+            var tnxData = {
               msg: this.receivedTnx.msg,
               sharedSecret: this.receivedTnx.sharedsecret,
               recipeintAdd: this.receivedTnx.recipeintAdd
             }
-            console.log('Received transaction data is: ', data)
+            console.log('Received transaction data is: ', tnxData)
             // console.log('Connecting to IPNS using: ', this.$store.state.IPNShash)
             // Get current user IPNS data.
             Myipfs.name.resolve(this.$store.state.IPNShash).then(res => {
@@ -120,11 +188,14 @@ export default {
                       console.log('Decryption successful')
                       // Building new object keys.
                       // Original data: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd}
-                      const countEntries = Object.keys(BytesString).length // Get current number of items.
+                      // console.log('The BytesString object: ', BytesString)
+                      console.log('The BytesString data object: ', BytesString.data)
+                      var byteData = BytesString.data
+                      console.log('Original values as array: ', Object.values(BytesString.data))
+                      const countEntries = Object.keys(byteData).length // Get current number of items.
                       console.log('Original number of entries: ', countEntries)
-                      const increasedObjCount = (countEntries / 4) + 1
-                      const newMsg = 'msg'
-                      const newMsgIndex = newMsg.concat(increasedObjCount)
+                      const increasedObjCount = Math.floor((countEntries / 60) + 1)
+                      const newMsgIndex = 'msg'.concat(increasedObjCount)
                       const shSecret = 'sharedSecret'
                       const newshSecret = shSecret.concat(increasedObjCount)
                       const newcounterValue = 'counterValue'
@@ -132,10 +203,10 @@ export default {
                       const newRecAdd = 'recAdd'
                       const newRecAddIndex = newRecAdd.concat(increasedObjCount)
                       // Get counter value and increment it.
-                      var counters = Object.keys(BytesString).filter(function (k) {
+                      var counters = Object.keys(byteData).filter(function (k) {
                         return k.indexOf('counterValue') === 0
                       }).reduce(function (pulledCounterData, k) {
-                        pulledCounterData[k] = BytesString[k]
+                        pulledCounterData[k] = byteData[k]
                         return pulledCounterData
                       }, {})
                       const countersArray = Object.values(counters)
@@ -143,10 +214,10 @@ export default {
                       const counterLength = countersArray.length
                       console.log('Next counter in use: ', counterLength)
                       // Update the object.
-                      BytesString[newMsgIndex] = data.msg
-                      BytesString[newshSecret] = data.sharedSecret
+                      BytesString[newMsgIndex] = tnxData.msg
+                      BytesString[newshSecret] = tnxData.sharedSecret
                       BytesString[increasedCounterValue] = counterLength
-                      BytesString[newRecAddIndex] = data.recipeintAdd
+                      BytesString[newRecAddIndex] = tnxData.recipeintAdd
                       console.log('Object updated.')
                       console.log('New object is: ', BytesString)
                       // Add to ipfs and publish to IPNS.
@@ -170,8 +241,8 @@ export default {
                     }
                   }).catch((error) => {
                     this.recipientProcessesLoading = false
-                    this.$message.error('Error encrypting data. Please, try again..')
-                    console.log('Error with encryption:', error)
+                    this.$message.error('Error decrypting data. Please, try again..')
+                    console.log('Error with decryption:', error)
                   }
                   )
                 })
@@ -228,6 +299,65 @@ export default {
         console.log('IPNS error.', err)
       })
     },
+    getUserData () {
+      console.log('Retrieving user data')
+      this.getUserDataLoading = true
+      this.encryptedDataLoading = true
+      Myipfs.name.resolve(this.$store.state.IPNShash).then(res => {
+        console.log('IPNS Success!')
+        console.log('IPFS equivalent hash is: ', res.path)
+        // Get the data.
+        Myipfs.cat(res.path).then(retrievedData => {
+          // console.log('Encrypted data is: ', retrievedData.toString('utf8'))
+          this.tableData[0] = []
+          this.tableData[0].encryptedDataRetrieved = retrievedData.toString('utf8')
+          this.encryptedDataLoading = false
+          this.encryptedData = true
+          // Decrypting the data.
+          this.decryptedDataLoading = true
+          this.$prompt('Please your decryption key.', 'Information required', {
+            confirmButtonText: 'Continue',
+            cancelButtonText: 'Cancel',
+            inputPlaceholder: 'Enter decryption key.'
+          }).then(({ value }) => {
+            symDecrypt(retrievedData.toString('utf8'), value).then(BytesString => {
+              if (Object.keys(BytesString).length !== 0) {
+                console.log('Decryption successful')
+                console.log('The BytesString data object: ', BytesString.data)
+                const arrayBytesString = Object.values(BytesString)
+                console.log('BytesString as array is: ', arrayBytesString)
+                // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd}
+                // Testing part retrieval: Receivers
+                var receivers = Object.keys(BytesString).filter(function (k) {
+                  return k.indexOf('recAdd') === 0
+                }).reduce(function (pulledRecData, k) {
+                  pulledRecData[k] = BytesString[k]
+                  return pulledRecData
+                }, {})
+                const recArray = Object.values(receivers)
+                console.log('All receivers are: ', recArray)
+                // Show decrypted data.
+                if (Object.keys(BytesString).length >= 1) { // Checking for zero publications.
+                  for (let i = 0; i < Object.keys(BytesString).length; i++) {
+                    this.pageTableData[i] = []
+                    this.pageTableData[i].msgsOrCoin = BytesString.data[i]
+                    this.pageTableData[i].sharedSecret = BytesString.data[i]
+                    this.pageTableData[i].counter = BytesString.data[i]
+                    this.pageTableData[i].receiver = BytesString.data[i]
+                    this.getUserDataLoading = false
+                    this.decryptedDataLoading = false
+                  }
+                } else {
+                  this.getUserDataLoading = false
+                  this.decryptedDataLoading = false
+                  this.$message('No backup data found.')
+                }
+              }
+            })
+          })
+        })
+      })
+    },
     resetForm (formName) {
       this.$refs[formName].resetFields()
     },
@@ -251,11 +381,16 @@ export default {
 }
 
 #rightContainer{
-  width: 40rem;
+  width: 45rem;
   height: 32rem;
- border-width: 2px 2px;
+  margin-left: -8rem;
+  border-width: 2px 2px;
   border-color: rgb(155, 97, 108);
   border-radius: 1%;
   background-color:rgb(221, 231, 243);
+}
+
+#btnGetData{
+  margin-top: 1rem;
 }
 </style>

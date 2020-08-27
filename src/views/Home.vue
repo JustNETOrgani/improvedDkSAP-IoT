@@ -62,7 +62,6 @@ export default {
       }).then(({ value }) => {
         symEncrypt(msgJSONstr, value).then(encryptedData => {
           console.log('Encryption done.')
-          // console.log('Encrypted manuscript data is: ', encryptedData)
           this.pushToIPFShub(encryptedData)
         }).catch((error) => {
           this.loadingData = false
@@ -105,6 +104,8 @@ export default {
             })
           }
         })
+        // Push IPNS to store.
+        this.$store.state.IPNShash = ipnsHash
         // change route to transactions page.
         this.$router.push('/transactions')
       }).catch((err) => {

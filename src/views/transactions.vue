@@ -4,7 +4,11 @@
     <div id="topNav">
       <el-link icon="el-icon-arrow-left" style="font-size:17px;float:left;" @click="backToPrvPack">Initialization Page</el-link>
     </div>
-    <h3>Welcome to transactions page</h3>
+    <el-row>
+      <el-col :span="21" :offset="1">
+        <h3>Transactions page</h3>
+      </el-col>
+    </el-row>
     <el-row>
       <el-col :span="10" :offset="1">
         <div id="leftContainer">
@@ -123,6 +127,7 @@ export default {
       userEncryptedMobileData: '',
       pageTableData: [],
       tableData: [],
+      backupRetrieved: 0,
       rules: {
         msg: [
           { required: true, message: 'Please input received message or coin', trigger: 'blur' },
@@ -194,7 +199,7 @@ export default {
                       console.log('Original values as array: ', Object.values(BytesString.data))
                       const countEntries = Object.keys(byteData).length // Get current number of items.
                       console.log('Original number of entries: ', countEntries)
-                      const increasedObjCount = Math.floor((countEntries / 60) + 1)
+                      const increasedObjCount = Math.floor((countEntries / 4) + 1)
                       const newMsgIndex = 'msg'.concat(increasedObjCount)
                       const shSecret = 'sharedSecret'
                       const newshSecret = shSecret.concat(increasedObjCount)
@@ -214,14 +219,14 @@ export default {
                       const counterLength = countersArray.length
                       console.log('Next counter in use: ', counterLength)
                       // Update the object.
-                      BytesString[newMsgIndex] = tnxData.msg
-                      BytesString[newshSecret] = tnxData.sharedSecret
-                      BytesString[increasedCounterValue] = counterLength
-                      BytesString[newRecAddIndex] = tnxData.recipeintAdd
+                      byteData[newMsgIndex] = tnxData.msg
+                      byteData[newshSecret] = tnxData.sharedSecret
+                      byteData[increasedCounterValue] = counterLength
+                      byteData[newRecAddIndex] = tnxData.recipeintAdd
                       console.log('Object updated.')
-                      console.log('New object is: ', BytesString)
+                      console.log('New object is: ', byteData)
                       // Add to ipfs and publish to IPNS.
-                      const msgJSONstr = JSON.stringify({ ...BytesString }) // Without JSON.stringfy, error is thrown at encryption stage.
+                      const msgJSONstr = { ...byteData }
                       // Encrypt the data to be sent to IPFS.
                       this.$prompt('Please your encryption key.', 'Information required', {
                         confirmButtonText: 'Continue',
@@ -300,64 +305,82 @@ export default {
       })
     },
     getUserData () {
-      console.log('Retrieving user data')
-      this.getUserDataLoading = true
-      this.encryptedDataLoading = true
-      Myipfs.name.resolve(this.$store.state.IPNShash).then(res => {
-        console.log('IPNS Success!')
-        console.log('IPFS equivalent hash is: ', res.path)
-        // Get the data.
-        Myipfs.cat(res.path).then(retrievedData => {
+      if (this.backupRetrieved === 0) {
+        console.log('Retrieving user data')
+        this.getUserDataLoading = true
+        this.encryptedDataLoading = true
+        Myipfs.name.resolve(this.$store.state.IPNShash).then(res => {
+          console.log('IPNS Success!')
+          console.log('IPFS equivalent hash is: ', res.path)
+          // Get the data.
+          Myipfs.cat(res.path).then(retrievedData => {
           // console.log('Encrypted data is: ', retrievedData.toString('utf8'))
-          this.tableData[0] = []
-          this.tableData[0].encryptedDataRetrieved = retrievedData.toString('utf8')
-          this.encryptedDataLoading = false
-          this.encryptedData = true
-          // Decrypting the data.
-          this.decryptedDataLoading = true
-          this.$prompt('Please your decryption key.', 'Information required', {
-            confirmButtonText: 'Continue',
-            cancelButtonText: 'Cancel',
-            inputPlaceholder: 'Enter decryption key.'
-          }).then(({ value }) => {
-            symDecrypt(retrievedData.toString('utf8'), value).then(BytesString => {
-              if (Object.keys(BytesString).length !== 0) {
-                console.log('Decryption successful')
-                console.log('The BytesString data object: ', BytesString.data)
-                const arrayBytesString = Object.values(BytesString)
-                console.log('BytesString as array is: ', arrayBytesString)
-                // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd}
-                // Testing part retrieval: Receivers
-                var receivers = Object.keys(BytesString).filter(function (k) {
-                  return k.indexOf('recAdd') === 0
-                }).reduce(function (pulledRecData, k) {
-                  pulledRecData[k] = BytesString[k]
-                  return pulledRecData
-                }, {})
-                const recArray = Object.values(receivers)
-                console.log('All receivers are: ', recArray)
-                // Show decrypted data.
-                if (Object.keys(BytesString).length >= 1) { // Checking for zero publications.
-                  for (let i = 0; i < Object.keys(BytesString).length; i++) {
-                    this.pageTableData[i] = []
-                    this.pageTableData[i].msgsOrCoin = BytesString.data[i]
-                    this.pageTableData[i].sharedSecret = BytesString.data[i]
-                    this.pageTableData[i].counter = BytesString.data[i]
-                    this.pageTableData[i].receiver = BytesString.data[i]
-                    this.getUserDataLoading = false
+            this.$message('Backup data successfully retrieved.')
+            this.tableData[0] = []
+            this.tableData[0].encryptedDataRetrieved = retrievedData.toString('utf8')
+            this.encryptedDataLoading = false
+            this.encryptedData = true
+            // Decrypting the data.
+            this.decryptedDataLoading = true
+            this.$prompt('Please your decryption key.', 'Information required', {
+              confirmButtonText: 'Continue',
+              cancelButtonText: 'Cancel',
+              inputPlaceholder: 'Enter decryption key.'
+            }).then(({ value }) => {
+              symDecrypt(retrievedData.toString('utf8'), value).then(BytesString => {
+                if (Object.keys(BytesString).length !== 0) {
+                  console.log('Decryption successful')
+                  console.log('The BytesString data object: ', BytesString.data)
+                  const arrayBytesString = Object.values(BytesString)
+                  console.log('BytesString as array is: ', arrayBytesString)
+                  // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd}
+                  // Testing part retrieval: Receivers
+                  var receivers = Object.keys(BytesString.data).filter(function (k) {
+                    return k.indexOf('recAdd') === 0
+                  }).reduce(function (pulledRecData, k) {
+                    pulledRecData[k] = BytesString.data[k]
+                    return pulledRecData
+                  }, {})
+                  const recArray = Object.values(receivers)
+                  // console.log('All receivers: ', receivers)
+                  console.log('All receivers as values are: ', recArray)
+                  // console.log('Total number of iterations: ', Object.keys(BytesString.data).length)
+                  // Show decrypted data.
+                  if (Object.keys(BytesString.data).length >= 1) { // Checking for zero publications.
+                    for (let i = 1; i < Object.keys(BytesString.data).length / 4; i++) {
+                      this.pageTableData[i] = []
+                      this.pageTableData[i].msgsOrCoin = BytesString.data['msg'.concat(i + 1)]
+                      this.pageTableData[i].sharedSecret = BytesString.data['sharedSecret'.concat(i + 1)]
+                      this.pageTableData[i].counter = BytesString.data['counterValue'.concat(i + 1)]
+                      this.pageTableData[i].receiver = BytesString.data['recAdd'.concat(i + 1)]
+                      this.getUserDataLoading = false
+                    }
+                    this.$message({
+                      message: 'Data decryption successful',
+                      type: 'success',
+                      center: true
+                    })
                     this.decryptedDataLoading = false
                     this.decryptedData = true
+                    // Set backup retrieved to 1.
+                    this.backupRetrieved = 1
+                  } else {
+                    this.getUserDataLoading = false
+                    this.decryptedDataLoading = false
+                    this.$message({
+                      message: 'No backup data found.',
+                      type: 'warning',
+                      center: true
+                    })
                   }
-                } else {
-                  this.getUserDataLoading = false
-                  this.decryptedDataLoading = false
-                  this.$message('No backup data found.')
                 }
-              }
+              })
             })
           })
         })
-      })
+      } else {
+        this.$message.error('Already displaying retrieved data. Refresh page.')
+      }
     },
     resetForm (formName) {
       this.$refs[formName].resetFields()

@@ -51,7 +51,7 @@ export default {
       // Prepare data to be in Object format.
       const senderObj = { msg1: msg, sharedSecret1: sharedSecret, counterValue1: counterValue, recAdd1: recAdd }
       // Data encryption begins.
-      const msgJSONstr = JSON.stringify({ ...senderObj }) // Without JSON.stringfy, error is thrown at encryption stage.
+      const msgJSONstr = { ...senderObj }
       console.log('Object to be stored on IPFS: ', msgJSONstr)
       // var key = prompt('Please enter Data Encryption key. Keep it safe.')
       // var encryptedMsg = symEncrypt(msgJSONstr, key).toString()

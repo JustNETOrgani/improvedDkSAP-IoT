@@ -24,8 +24,8 @@
                   label-width="110px"
                 >
                   <el-col :span="16">
-                    <el-form-item label="Received Message or Coin" prop="msg">
-                      <el-input v-model="receivedTnx.msg" placeholder="Please enter message received."></el-input>
+                    <el-form-item label="Transaction data or Coin" prop="msg">
+                      <el-input v-model="receivedTnx.msg" placeholder="Please enter transaction data or coin received."></el-input>
                     </el-form-item>
                     <el-form-item label="Shared secret" prop="sharedsecret">
                       <el-input v-model="receivedTnx.sharedsecret" placeholder="Please enter shared secret."></el-input>
@@ -147,10 +147,10 @@ export default {
         { label: 'Encrypted data', prop: 'encryptedDataRetrieved', width: '680px' }
       ],
       decryptedDataTableLabel: [
-        { label: 'Message or Coin', prop: 'msgsOrCoin', width: '200px' },
+        { label: 'Receiver', prop: 'receiver', width: '130px' },
         { label: 'Shared Secret', prop: 'sharedSecret', width: '160px' },
         { label: 'Counter', prop: 'counter', width: '90px' },
-        { label: 'Receiver', prop: 'receiver', width: '130px' }
+        { label: 'Data or Coin', prop: 'dataOrCoin', width: '200px' }
       ]
     }
   },
@@ -340,7 +340,7 @@ export default {
                   if (Object.keys(BytesString.data).length >= 1) { // Checking for zero publications.
                     for (let i = 1; i < Object.keys(BytesString.data).length / 4; i++) {
                       this.pageTableData[i] = []
-                      this.pageTableData[i].msgsOrCoin = BytesString.data['msg'.concat(i + 1)]
+                      this.pageTableData[i].dataOrCoin = BytesString.data['msg'.concat(i + 1)]
                       this.pageTableData[i].sharedSecret = BytesString.data['sharedSecret'.concat(i + 1)]
                       this.pageTableData[i].counter = BytesString.data['counterValue'.concat(i + 1)]
                       this.pageTableData[i].receiver = BytesString.data['recAdd'.concat(i + 1)]

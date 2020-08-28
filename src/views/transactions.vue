@@ -325,7 +325,7 @@ export default {
             this.encryptedData = true
             // Decrypting the data.
             this.decryptedDataLoading = true
-            this.$prompt('Please your decryption key.', 'Information required', {
+            this.$prompt('Please enter your decryption key.', 'Information required', {
               confirmButtonText: 'Continue',
               cancelButtonText: 'Cancel',
               inputPlaceholder: 'Enter decryption key.'

@@ -34,7 +34,7 @@
                       <el-input v-model="receivedTnx.recipeintAdd" placeholder="Please enter recipient's address."></el-input>
                     </el-form-item>
                     <el-form-item>
-                    <el-button type="primary" :loading="recipientProcessesLoading" @click="submitForm('receivedTnx')">Receive transaction</el-button>
+                    <el-button type="primary" icon="el-icon-coin" :loading="recipientProcessesLoading" @click="submitForm('receivedTnx')">Receive transaction</el-button>
                       <el-button @click="resetForm('receivedTnx')">Reset</el-button>
                     </el-form-item>
                   </el-col>
@@ -227,7 +227,7 @@ export default {
                       // Add to ipfs and publish to IPNS.
                       const msgJSONstr = { ...byteData }
                       // Encrypt the data to be sent to IPFS.
-                      this.$prompt('Please your encryption key.', 'Information required', {
+                      this.$prompt('Please enter your encryption key.', 'Information required', {
                         confirmButtonText: 'Continue',
                         cancelButtonText: 'Cancel',
                         inputPlaceholder: 'Enter your encryption key.'
@@ -301,7 +301,7 @@ export default {
         // Push IPNS to store.
         this.$store.state.IPNShash = ipnsHash
         // Reset form
-        this.resetForm('receivedTnx')
+        // this.resetForm('receivedTnx')
       }).catch((err) => {
         console.log('IPNS error.', err)
         this.recipientProcessesLoading = false

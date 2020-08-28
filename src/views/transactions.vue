@@ -25,13 +25,13 @@
                 >
                   <el-col :span="16">
                     <el-form-item label="Transaction data or Coin" prop="msg">
-                      <el-input v-model="receivedTnx.msg" placeholder="Please enter transaction data or coin received."></el-input>
+                      <el-input v-model="receivedTnx.msg" placeholder="Please enter transaction data or coin received." clearable></el-input>
                     </el-form-item>
                     <el-form-item label="Shared secret" prop="sharedsecret">
-                      <el-input v-model="receivedTnx.sharedsecret" placeholder="Please enter shared secret."></el-input>
+                      <el-input v-model="receivedTnx.sharedsecret" placeholder="Please enter shared secret." show-password clearable></el-input>
                     </el-form-item>
                     <el-form-item label="Recipient" prop="recipeintAdd">
-                      <el-input v-model="receivedTnx.recipeintAdd" placeholder="Please enter recipient's address."></el-input>
+                      <el-input v-model="receivedTnx.recipeintAdd" placeholder="Please enter recipient's address." clearable></el-input>
                     </el-form-item>
                     <el-form-item>
                     <el-button type="primary" icon="el-icon-coin" :loading="recipientProcessesLoading" @click="submitForm('receivedTnx')">Receive transaction</el-button>

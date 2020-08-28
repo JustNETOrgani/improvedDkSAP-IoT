@@ -1,23 +1,23 @@
 <template>
   <div class="home">
-    <div id="homePage">
-      <el-row>
-          <el-col :span="22" :offset="1">
-            <p>Encryption and decentralized storage-based DkSAP-IoT</p>
-          </el-col>
-      </el-row>
-      <el-row>
-          <el-col :span="14" :offset="4">
-            <p>Click button below to start</p>
-          </el-col>
-      </el-row>
-      <el-row>
-          <el-col :span="14" :offset="5">
-            <el-button :loading="loadingData" id="btnInit" type="primary" round @click="protocolInit()">Initialize Protocol</el-button>
-          </el-col>
-      </el-row>
-    </div>
-    <div id="footerDiv">
+    <div id="myWrapper">
+      <div id="homePage">
+        <el-row>
+            <el-col :span="22" :offset="1">
+              <h4>Encryption and decentralized storage-based DkSAP-IoT</h4>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="14" :offset="4">
+              <p>Click button below to start</p>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="14" :offset="5">
+              <el-button :loading="loadingData" icon="el-icon-switch-button" id="btnInit" type="primary" round @click="protocolInit()">Initialize Protocol</el-button>
+            </el-col>
+        </el-row>
+      </div>
     </div>
   </div>
 </template>
@@ -123,14 +123,27 @@ export default {
 </script>
 
 <style scoped>
+#myWrapper{
+  margin-top: 5%;
+  margin-bottom: 5%;
+  margin-left: 28%;
+  width: 40rem;
+  position: absolute;
+  height: 35rem;
+  border-width: 2px 2px;
+  border-color: rgb(155, 97, 108);
+  border-radius: 50%;
+  background-color:rgb(191, 205, 219);
+}
+
 #homePage{
-  margin: 20% auto;
-  width: 30rem;
+  margin: 25% auto;
+  width: 32rem;
   height: 13rem;
   border-width: 2px 2px;
   border-color: rgb(155, 97, 108);
-  border-radius: 1%;
-  background-color:rgb(162, 183, 207);
+  border-radius: 8%;
+  background-color:rgb(214, 226, 240);
 }
 
 #btnInit{

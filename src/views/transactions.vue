@@ -193,7 +193,6 @@ export default {
                       console.log('Decryption successful')
                       // Building new object keys.
                       // Original data: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd}
-                      // console.log('The BytesString object: ', BytesString)
                       console.log('The BytesString data object: ', BytesString.data)
                       var byteData = BytesString.data
                       console.log('Original values as array: ', Object.values(BytesString.data))
@@ -253,8 +252,6 @@ export default {
                 })
               })
             })
-            // Data encryption
-            // Upload to IPNS
             this.recipientProcessesLoading = false
           } else {
             console.log('Submission error.')
@@ -268,15 +265,12 @@ export default {
       }
     },
     pushToIPFShub (encryptedData) {
-      // var encryptedDataToSendToJviaIPFS = JSON.stringify({ encryptedData })
       console.log('Connecting to IPFS.')
       const MyBuffer = window.Ipfs.Buffer
       var dataToBuffer = MyBuffer.from(encryptedData)
       Myipfs.add(dataToBuffer).then(res => {
         console.log('Data upload to IPFS sucessful')
         this.loadingData = false
-        // this.$message('File upload success.')
-        // this.IPFSHashOfFinalPaper = res[0].hash
         console.log('IPFS hash is: ', res[0].hash)
         this.publishToIPNS(res[0].hash)
       })
@@ -285,7 +279,7 @@ export default {
       console.log('Connecting to IPNS')
       Myipfs.name.publish(returnedHash).then(res => {
         console.log('IPNS Success!')
-        const ipnsHash = res.name // This should be same as Peer ID. All users must point to this.
+        const ipnsHash = res.name
         console.log('IPNS address is:', ipnsHash)
         this.$alert('IPFS object updated successfully. Your IPNS address is ' + ipnsHash, 'Notice on encryption and storage.', {
           confirmButtonText: 'OK',
@@ -298,8 +292,8 @@ export default {
         })
         // Push IPNS to store.
         this.$store.state.IPNShash = ipnsHash
-        // change route to transactions page.
-        // this.pgReload()
+        // Reset form
+        this.resetForm('receivedTnx')
       }).catch((err) => {
         console.log('IPNS error.', err)
       })
@@ -314,7 +308,6 @@ export default {
           console.log('IPFS equivalent hash is: ', res.path)
           // Get the data.
           Myipfs.cat(res.path).then(retrievedData => {
-          // console.log('Encrypted data is: ', retrievedData.toString('utf8'))
             this.$message('Backup data successfully retrieved.')
             this.tableData[0] = []
             this.tableData[0].encryptedDataRetrieved = retrievedData.toString('utf8')
@@ -342,9 +335,7 @@ export default {
                     return pulledRecData
                   }, {})
                   const recArray = Object.values(receivers)
-                  // console.log('All receivers: ', receivers)
                   console.log('All receivers as values are: ', recArray)
-                  // console.log('Total number of iterations: ', Object.keys(BytesString.data).length)
                   // Show decrypted data.
                   if (Object.keys(BytesString.data).length >= 1) { // Checking for zero publications.
                     for (let i = 1; i < Object.keys(BytesString.data).length / 4; i++) {

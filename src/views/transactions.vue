@@ -236,6 +236,10 @@ export default {
                           console.log('Encryption done.')
                           // Push to IPFS.
                           this.pushToIPFShub(encryptedData)
+                        }).catch(err => {
+                          console.log('Error encrypting data', err)
+                          this.recipientProcessesLoading = false
+                          this.$message.error('Error encrypting data.')
                         })
                       })
                     } else {
@@ -245,7 +249,7 @@ export default {
                     }
                   }).catch((error) => {
                     this.recipientProcessesLoading = false
-                    this.$message.error('Error decrypting data. Please, try again..')
+                    this.$message.error('Error decrypting data. Wrong decryption key.')
                     console.log('Error with decryption:', error)
                   }
                   )
@@ -365,6 +369,10 @@ export default {
                     })
                   }
                 }
+              }).catch(err => {
+                console.log('Error decrypting data', err)
+                this.getUserDataLoading = false
+                this.$message.error('Error decrypting data. Wrong decryption key.')
               })
             })
           })

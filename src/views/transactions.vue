@@ -277,6 +277,10 @@ export default {
         this.loadingData = false
         console.log('IPFS hash is: ', res[0].hash)
         this.publishToIPNS(res[0].hash)
+      }).catch(err => {
+        console.log('Error pushing data to IPFS', err)
+        this.recipientProcessesLoading = false
+        this.$message.error('Error pushing data to IPFS.')
       })
     },
     publishToIPNS (returnedHash) {
@@ -300,6 +304,8 @@ export default {
         this.resetForm('receivedTnx')
       }).catch((err) => {
         console.log('IPNS error.', err)
+        this.recipientProcessesLoading = false
+        this.$message.error('Error publishing data to IPNS.')
       })
     },
     getUserData () {
@@ -374,7 +380,15 @@ export default {
                 this.getUserDataLoading = false
                 this.$message.error('Error decrypting data. Wrong decryption key.')
               })
+            }).catch(err => {
+              console.log('Cancelled by user', err)
+              this.getUserDataLoading = false
+              this.$message.error('Decryption key is required.')
             })
+          }).catch(err => {
+            console.log('Error getting IPFS data', err)
+            this.getUserDataLoading = false
+            this.$message.error('Error getting data from IPFS. Please, try again.')
           })
         })
       } else {

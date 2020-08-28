@@ -24,8 +24,6 @@
 
 <script>
 // @ is an alias to /src
-// import Head from '@/components/header'
-// import Footer from '@/components/Footer'
 import { symEncrypt } from '@/assets/js/symEncryptAndDec'
 const Myipfs = new window.Ipfs()
 
@@ -53,8 +51,6 @@ export default {
       // Data encryption begins.
       const msgJSONstr = { ...senderObj }
       console.log('Object to be stored on IPFS: ', msgJSONstr)
-      // var key = prompt('Please enter Data Encryption key. Keep it safe.')
-      // var encryptedMsg = symEncrypt(msgJSONstr, key).toString()
       this.$prompt('Please your encryption key.', 'Information required', {
         confirmButtonText: 'Continue',
         cancelButtonText: 'Cancel',
@@ -70,21 +66,14 @@ export default {
         }
         )
       })
-      // console.log('Encrypted Public Key data: ', encryptedMsg)
-      // Data encryption ends here.
-      // Send to IPFS.
-      // const ipfs      = window.IpfsHttpClient('/ip4/127.0.0.1/tcp/5001')
     },
     pushToIPFShub (encryptedData) {
-      // var encryptedDataToSendToJviaIPFS = JSON.stringify({ encryptedData })
       console.log('Connecting to IPFS.')
       const MyBuffer = window.Ipfs.Buffer
       var dataToBuffer = MyBuffer.from(encryptedData)
       Myipfs.add(dataToBuffer).then(res => {
         console.log('Data upload to IPFS sucessful')
         this.loadingData = false
-        // this.$message('File upload success.')
-        // this.IPFSHashOfFinalPaper = res[0].hash
         console.log('IPFS hash is: ', res[0].hash)
         this.publishToIPNS(res[0].hash)
       })
@@ -93,7 +82,7 @@ export default {
       console.log('Connecting to IPNS')
       Myipfs.name.publish(returnedHash).then(res => {
         console.log('IPNS Success!')
-        const ipnsHash = res.name // This should be same as Peer ID. All users must point to this.
+        const ipnsHash = res.name
         console.log('IPNS address is:', ipnsHash)
         this.$alert('Successful initialization. Your IPNS address is ' + ipnsHash, 'State of protocol initialization.', {
           confirmButtonText: 'OK',

@@ -13,7 +13,7 @@
       </el-row>
       <el-row>
           <el-col :span="14" :offset="5">
-            <el-button id="btnInit" type="primary" round @click="protocolInit()">Initialize Protocol</el-button>
+            <el-button :loading="loadingData" id="btnInit" type="primary" round @click="protocolInit()">Initialize Protocol</el-button>
           </el-col>
       </el-row>
     </div>
@@ -29,6 +29,11 @@ const Myipfs = new window.Ipfs()
 
 export default {
   // name: 'Home',
+  data () {
+    return {
+      loadingData: false
+    }
+  },
   components: {
     // Footer
   },
@@ -42,6 +47,7 @@ export default {
       }
     },
     protocolInit () {
+      this.loadingData = true
       var msg = ''
       var sharedSecret = 0
       var counterValue = 0
@@ -65,6 +71,10 @@ export default {
           console.log('Error with encryption:', error)
         }
         )
+      }).catch(err => {
+        console.log('Cancelled by user', err)
+        this.loadingData = false
+        this.$message.error('Encryption key is required.')
       })
     },
     pushToIPFShub (encryptedData) {
@@ -76,6 +86,10 @@ export default {
         this.loadingData = false
         console.log('IPFS hash is: ', res[0].hash)
         this.publishToIPNS(res[0].hash)
+      }).catch(err => {
+        console.log('Error pushing data to IPFS', err)
+        this.loadingData = false
+        this.$message.error('Error pushing data to IPFS.')
       })
     },
     publishToIPNS (returnedHash) {
@@ -84,6 +98,7 @@ export default {
         console.log('IPNS Success!')
         const ipnsHash = res.name
         console.log('IPNS address is:', ipnsHash)
+        this.loadingData = false
         this.$alert('Successful initialization. Your IPNS address is ' + ipnsHash, 'State of protocol initialization.', {
           confirmButtonText: 'OK',
           callback: action => {
@@ -99,6 +114,8 @@ export default {
         this.$router.push('/transactions')
       }).catch((err) => {
         console.log('IPNS error.', err)
+        this.loadingData = false
+        this.$message.error('Error publishing data to IPNS.')
       })
     }
   }

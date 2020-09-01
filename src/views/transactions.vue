@@ -234,14 +234,35 @@ export default {
                         inputPlaceholder: 'Enter your encryption key.',
                         inputType: 'password'
                       }).then(({ value }) => {
-                        symEncrypt(msgJSONstr, value).then(encryptedData => {
-                          console.log('Encryption done.')
-                          // Push to IPFS.
-                          this.pushToIPFShub(encryptedData)
+                        const firstEnteredKeyValue = value
+                        this.$prompt('Please reenter your encryption key to confirm.', 'Key Confirmation required', {
+                          confirmButtonText: 'Continue',
+                          cancelButtonText: 'Cancel',
+                          inputPlaceholder: 'Enter your encryption key.',
+                          inputType: 'password'
+                        }).then(({ value }) => {
+                          if (firstEnteredKeyValue === value) {
+                            symEncrypt(msgJSONstr, value).then(encryptedData => {
+                              console.log('Encryption done.')
+                              this.pushToIPFShub(encryptedData)
+                            }).catch((error) => {
+                              this.loadingData = false
+                              this.$message.error('Error encrypting data. Please, try again..')
+                              console.log('Error with encryption:', error)
+                            }
+                            )
+                          } else {
+                            this.loadingData = false
+                            this.$message({
+                              showClose: true,
+                              message: 'Sorry! Confirmation key mismatch.',
+                              type: 'warning'
+                            })
+                          }
                         }).catch(err => {
-                          console.log('Error encrypting data', err)
-                          this.recipientProcessesLoading = false
-                          this.$message.error('Error encrypting data.')
+                          console.log('Cancelled by user', err)
+                          this.loadingData = false
+                          this.$message.error('Confirmation of encryption key is required.')
                         })
                       })
                     } else {
@@ -255,6 +276,10 @@ export default {
                     console.log('Error with decryption:', error)
                   }
                   )
+                }).catch(err => {
+                  console.log('Cancelled by user', err)
+                  this.recipientProcessesLoading = false
+                  this.$message.error('Decryption key is required.')
                 })
               })
             })

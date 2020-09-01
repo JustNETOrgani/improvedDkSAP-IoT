@@ -183,10 +183,11 @@ export default {
               // Get the data.
               Myipfs.cat(res.path).then(retrievedData => {
                 var encryptedUserMobileData = retrievedData.toString('utf8')
-                this.$prompt('Please your decryption key.', 'Information required', {
+                this.$prompt('Please enter your decryption key.', 'Information required', {
                   confirmButtonText: 'Continue',
                   cancelButtonText: 'Cancel',
-                  inputPlaceholder: 'Enter decryption key.'
+                  inputPlaceholder: 'Enter decryption key.',
+                  inputType: 'password'
                 }).then(({ value }) => {
                   symDecrypt(encryptedUserMobileData, value).then(BytesString => {
                     if (Object.keys(BytesString).length !== 0) {
@@ -230,7 +231,8 @@ export default {
                       this.$prompt('Please enter your encryption key.', 'Information required', {
                         confirmButtonText: 'Continue',
                         cancelButtonText: 'Cancel',
-                        inputPlaceholder: 'Enter your encryption key.'
+                        inputPlaceholder: 'Enter your encryption key.',
+                        inputType: 'password'
                       }).then(({ value }) => {
                         symEncrypt(msgJSONstr, value).then(encryptedData => {
                           console.log('Encryption done.')
@@ -328,7 +330,8 @@ export default {
             this.$prompt('Please enter your decryption key.', 'Information required', {
               confirmButtonText: 'Continue',
               cancelButtonText: 'Cancel',
-              inputPlaceholder: 'Enter decryption key.'
+              inputPlaceholder: 'Enter decryption key.',
+              inputType: 'password'
             }).then(({ value }) => {
               symDecrypt(retrievedData.toString('utf8'), value).then(BytesString => {
                 if (Object.keys(BytesString).length !== 0) {

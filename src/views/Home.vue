@@ -57,10 +57,11 @@ export default {
       // Data encryption begins.
       const msgJSONstr = { ...senderObj }
       console.log('Object to be stored on IPFS: ', msgJSONstr)
-      this.$prompt('Please your encryption key.', 'Information required', {
+      this.$prompt('Please enter your encryption key.', 'Information required', {
         confirmButtonText: 'Continue',
         cancelButtonText: 'Cancel',
-        inputPlaceholder: 'Enter your encryption key.'
+        inputPlaceholder: 'Enter your encryption key.',
+        inputType: 'password'
       }).then(({ value }) => {
         symEncrypt(msgJSONstr, value).then(encryptedData => {
           console.log('Encryption done.')

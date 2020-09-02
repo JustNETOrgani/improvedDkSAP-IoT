@@ -316,7 +316,7 @@ export default {
         console.log('IPNS Success!')
         const ipnsHash = res.name
         console.log('IPNS address is:', ipnsHash)
-        this.$alert('IPFS object updated successfully. Your IPNS address is ' + ipnsHash, 'Notice on encryption and storage.', {
+        this.$alert('Storage on IPFS/IPNS successful. Your IPNS address is ' + ipnsHash, 'Notice on encryption and storage.', {
           confirmButtonText: 'OK',
           callback: action => {
             this.$message({
@@ -352,7 +352,7 @@ export default {
             this.encryptedData = true
             // Decrypting the data.
             this.decryptedDataLoading = true
-            this.$prompt('Please enter your decryption key.', 'Information required', {
+            this.$prompt('Getting data from... ' + this.$store.state.IPNShash + ' ...Please enter your decryption key.', 'Information required', {
               confirmButtonText: 'Continue',
               cancelButtonText: 'Cancel',
               inputPlaceholder: 'Enter decryption key.',

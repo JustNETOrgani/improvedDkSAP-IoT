@@ -47,8 +47,8 @@
       <el-col :span="10" :offset="2">
         <div class="tnxContainers" id="rightContainer">
           <el-row>
-            <el-col :span="5" :offset="6">
-              <h3>Data recovery</h3>
+            <el-col :span="9" :offset="2">
+              <h3>Data recovery - Receiver</h3>
             </el-col>
             <el-col :span="6" :offset="2">
               <el-button id="btnGetData" type="primary" plain icon="el-icon-download" :loading="getUserDataLoading" @click="getUserData()">Get data</el-button>
@@ -147,7 +147,7 @@ export default {
         { label: 'Encrypted data', prop: 'encryptedDataRetrieved', width: '680px' }
       ],
       decryptedDataTableLabel: [
-        { label: 'Receiver', prop: 'receiver', width: '90px' },
+        { label: 'Sender', prop: 'senderAdd', width: '90px' },
         { label: 'Expected destination keypair', prop: 'expDkp', width: '225px' },
         { label: 'Shared Secret', prop: 'sharedSecret', width: '130px' },
         { label: 'Counter', prop: 'counter', width: '80px' },
@@ -206,7 +206,7 @@ export default {
                       const newshSecret = shSecret.concat(increasedObjCount)
                       const newcounterValue = 'counterValue'
                       const increasedCounterValue = newcounterValue.concat(increasedObjCount)
-                      const newRecAdd = 'recAdd'
+                      const newRecAdd = 'senderAdd'
                       const newRecAddIndex = newRecAdd.concat(increasedObjCount)
                       const newExpDestKeyPair = 'expDestKeyPair'
                       const newExpDestKeyPairIndex = newExpDestKeyPair.concat(increasedObjCount)
@@ -370,7 +370,7 @@ export default {
                   console.log('The BytesString data object: ', BytesString.data)
                   const arrayBytesString = Object.values(BytesString)
                   console.log('BytesString as array is: ', arrayBytesString)
-                  // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd,expDestKeyPair: expDestKeyPair}
+                  // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,senderAdd:senderAdd,expDestKeyPair: expDestKeyPair}
                   // Testing part retrieval: Receivers
                   var receivers = Object.keys(BytesString.data).filter(function (k) {
                     return k.indexOf('recAdd') === 0
@@ -388,7 +388,7 @@ export default {
                       this.pageTableData[i].dataOrCoin = BytesString.data['msg'.concat(i + 1)]
                       this.pageTableData[i].sharedSecret = BytesString.data['sharedSecret'.concat(i + 1)]
                       this.pageTableData[i].counter = BytesString.data['counterValue'.concat(i + 1)]
-                      this.pageTableData[i].receiver = BytesString.data['recAdd'.concat(i + 1)]
+                      this.pageTableData[i].senderAdd = BytesString.data['senderAdd'.concat(i + 1)]
                       combinedKeyPair = BytesString.data['expDestKeyPair'.concat(i + 1)]
                       // Split and destination key pair.
                       this.pageTableData[i].expDkp = combinedKeyPair[0].substr(0, 7) + ', ' + combinedKeyPair[1].substr(0, 7)

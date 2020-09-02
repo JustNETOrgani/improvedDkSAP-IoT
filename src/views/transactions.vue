@@ -2,13 +2,15 @@
   <div class="transact">
     <Head></Head>
     <div id="topNav">
-      <el-link icon="el-icon-arrow-left" style="font-size:17px;float:left;" @click="backToPrvPack">Initialization Page</el-link>
+      <el-row>
+        <el-col :span="4" :offset="1">
+          <el-link icon="el-icon-arrow-left" style="font-size:17px;float:left;" @click="backToPrvPack">Initialization Page</el-link>
+        </el-col>
+        <el-col :span="10" :offset="1">
+          <h4>Transactions page</h4>
+        </el-col>
+      </el-row>
     </div>
-    <el-row>
-      <el-col :span="21" :offset="1">
-        <h3>Transactions page</h3>
-      </el-col>
-    </el-row>
     <el-row>
       <el-col :span="10" :offset="1">
         <div id="leftContainer">
@@ -29,6 +31,9 @@
                     </el-form-item>
                     <el-form-item label="Shared secret" prop="sharedsecret">
                       <el-input v-model="receivedTnx.sharedsecret" placeholder="Please enter shared secret." show-password clearable></el-input>
+                    </el-form-item>
+                    <el-form-item label="Sender" prop="senderAdd">
+                      <el-input v-model="receivedTnx.senderAdd" placeholder="Please enter your address." clearable></el-input>
                     </el-form-item>
                     <el-form-item label="Recipient" prop="recipeintAdd">
                       <el-input v-model="receivedTnx.recipeintAdd" placeholder="Please enter recipient's address." clearable></el-input>
@@ -115,6 +120,7 @@ export default {
       receivedTnx: {
         msg: '',
         sharedsecret: '',
+        senderAdd: '',
         recipeintAdd: ''
       },
       labelPosition: 'top',
@@ -136,6 +142,10 @@ export default {
         sharedsecret: [
           { required: true, message: 'Please input shared secret', trigger: 'blur' },
           { min: 3, message: 'Length should be at least 3', trigger: 'blur' }
+        ],
+        senderAdd: [
+          { required: true, message: 'Address must be in hex and legnth of 5', trigger: 'blur' },
+          { min: 5, message: 'Must be in hex and length 5', trigger: 'blur' }
         ],
         recipeintAdd: [
           { required: true, message: 'Address must be in hex and legnth of 5', trigger: 'blur' },
@@ -165,7 +175,7 @@ export default {
   },
   methods: {
     submitForm (formName) {
-      if (/^0x[0-9A-F]{5}$/i.test(this.receivedTnx.recipeintAdd) === true) {
+      if (/^0x[0-9A-F]{5}$/i.test(this.receivedTnx.senderAdd) === true && /^0x[0-9A-F]{5}$/i.test(this.receivedTnx.recipeintAdd) === true) {
         this.$refs[formName].validate(valid => {
           this.recipientProcessesLoading = true
           if (valid) {
@@ -173,7 +183,7 @@ export default {
             var tnxData = {
               msg: this.receivedTnx.msg,
               sharedSecret: this.receivedTnx.sharedsecret,
-              recipeintAdd: this.receivedTnx.recipeintAdd
+              senderAdd: this.receivedTnx.senderAdd
             }
             console.log('Received transaction data is: ', tnxData)
             // console.log('Connecting to IPNS using: ', this.$store.state.IPNShash)
@@ -207,7 +217,7 @@ export default {
                       const newcounterValue = 'counterValue'
                       const increasedCounterValue = newcounterValue.concat(increasedObjCount)
                       const newRecAdd = 'senderAdd'
-                      const newRecAddIndex = newRecAdd.concat(increasedObjCount)
+                      const newSenderAddIndex = newRecAdd.concat(increasedObjCount)
                       const newExpDestKeyPair = 'expDestKeyPair'
                       const newExpDestKeyPairIndex = newExpDestKeyPair.concat(increasedObjCount)
                       var randomHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
@@ -227,7 +237,7 @@ export default {
                       byteData[newMsgIndex] = tnxData.msg
                       byteData[newshSecret] = tnxData.sharedSecret
                       byteData[increasedCounterValue] = counterLength
-                      byteData[newRecAddIndex] = tnxData.recipeintAdd
+                      byteData[newSenderAddIndex] = tnxData.senderAdd
                       byteData[newExpDestKeyPairIndex] = newExpDestKeyPairData
                       console.log('Object updated.')
                       console.log('New object is: ', byteData)

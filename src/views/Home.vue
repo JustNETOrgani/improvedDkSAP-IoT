@@ -52,8 +52,15 @@ export default {
       var sharedSecret = 0
       var counterValue = 0
       var recAdd = ''
+      var expDestKeyPair = []
       // Prepare data to be in Object format.
-      const senderObj = { msg1: msg, sharedSecret1: sharedSecret, counterValue1: counterValue, recAdd1: recAdd }
+      const senderObj = {
+        msg1: msg,
+        sharedSecret1: sharedSecret,
+        counterValue1: counterValue,
+        recAdd1: recAdd,
+        expDestKeyPair1: expDestKeyPair
+      }
       // Data encryption begins.
       const msgJSONstr = { ...senderObj }
       console.log('Object to be stored on IPFS: ', msgJSONstr)

@@ -147,10 +147,11 @@ export default {
         { label: 'Encrypted data', prop: 'encryptedDataRetrieved', width: '680px' }
       ],
       decryptedDataTableLabel: [
-        { label: 'Receiver', prop: 'receiver', width: '130px' },
-        { label: 'Shared Secret', prop: 'sharedSecret', width: '160px' },
-        { label: 'Counter', prop: 'counter', width: '90px' },
-        { label: 'Data or Coin', prop: 'dataOrCoin', width: '200px' }
+        { label: 'Receiver', prop: 'receiver', width: '90px' },
+        { label: 'Expected destination keypair', prop: 'expDkp', width: '225px' },
+        { label: 'Shared Secret', prop: 'sharedSecret', width: '130px' },
+        { label: 'Counter', prop: 'counter', width: '80px' },
+        { label: 'Data/Coin', prop: 'dataOrCoin', width: '100px' }
       ]
     }
   },
@@ -193,13 +194,13 @@ export default {
                     if (Object.keys(BytesString).length !== 0) {
                       console.log('Decryption successful')
                       // Building new object keys.
-                      // Original data: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd}
+                      // Original data: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd, expDestKeyPair: expDestKeyPair}
                       console.log('The BytesString data object: ', BytesString.data)
                       var byteData = BytesString.data
                       console.log('Original values as array: ', Object.values(BytesString.data))
                       const countEntries = Object.keys(byteData).length // Get current number of items.
                       console.log('Original number of entries: ', countEntries)
-                      const increasedObjCount = Math.floor((countEntries / 4) + 1)
+                      const increasedObjCount = Math.floor((countEntries / 5) + 1)
                       const newMsgIndex = 'msg'.concat(increasedObjCount)
                       const shSecret = 'sharedSecret'
                       const newshSecret = shSecret.concat(increasedObjCount)
@@ -207,6 +208,10 @@ export default {
                       const increasedCounterValue = newcounterValue.concat(increasedObjCount)
                       const newRecAdd = 'recAdd'
                       const newRecAddIndex = newRecAdd.concat(increasedObjCount)
+                      const newExpDestKeyPair = 'expDestKeyPair'
+                      const newExpDestKeyPairIndex = newExpDestKeyPair.concat(increasedObjCount)
+                      var randomHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
+                      var newExpDestKeyPairData = ['0x' + randomHex(6), '0x' + randomHex(6)]
                       // Get counter value and increment it.
                       var counters = Object.keys(byteData).filter(function (k) {
                         return k.indexOf('counterValue') === 0
@@ -223,6 +228,7 @@ export default {
                       byteData[newshSecret] = tnxData.sharedSecret
                       byteData[increasedCounterValue] = counterLength
                       byteData[newRecAddIndex] = tnxData.recipeintAdd
+                      byteData[newExpDestKeyPairIndex] = newExpDestKeyPairData
                       console.log('Object updated.')
                       console.log('New object is: ', byteData)
                       // Add to ipfs and publish to IPNS.
@@ -364,7 +370,7 @@ export default {
                   console.log('The BytesString data object: ', BytesString.data)
                   const arrayBytesString = Object.values(BytesString)
                   console.log('BytesString as array is: ', arrayBytesString)
-                  // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd}
+                  // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,recAdd:recAdd,expDestKeyPair: expDestKeyPair}
                   // Testing part retrieval: Receivers
                   var receivers = Object.keys(BytesString.data).filter(function (k) {
                     return k.indexOf('recAdd') === 0
@@ -374,14 +380,18 @@ export default {
                   }, {})
                   const recArray = Object.values(receivers)
                   console.log('All receivers as values are: ', recArray)
+                  let combinedKeyPair = ''
                   // Show decrypted data.
-                  if (Object.keys(BytesString.data).length >= 1) { // Checking for zero publications.
-                    for (let i = 1; i < Object.keys(BytesString.data).length / 4; i++) {
+                  if (Object.keys(BytesString.data).length >= 1) { // Checking for zero data.
+                    for (let i = 1; i < Object.keys(BytesString.data).length / 5; i++) {
                       this.pageTableData[i] = []
                       this.pageTableData[i].dataOrCoin = BytesString.data['msg'.concat(i + 1)]
                       this.pageTableData[i].sharedSecret = BytesString.data['sharedSecret'.concat(i + 1)]
                       this.pageTableData[i].counter = BytesString.data['counterValue'.concat(i + 1)]
                       this.pageTableData[i].receiver = BytesString.data['recAdd'.concat(i + 1)]
+                      combinedKeyPair = BytesString.data['expDestKeyPair'.concat(i + 1)]
+                      // Split and destination key pair.
+                      this.pageTableData[i].expDkp = combinedKeyPair[0].substr(0, 7) + ', ' + combinedKeyPair[1].substr(0, 7)
                       this.getUserDataLoading = false
                     }
                     this.$message({

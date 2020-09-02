@@ -51,14 +51,14 @@ export default {
       var msg = ''
       var sharedSecret = 0
       var counterValue = 0
-      var recAdd = ''
+      var senderAdd = ''
       var expDestKeyPair = []
       // Prepare data to be in Object format.
       const senderObj = {
         msg1: msg,
         sharedSecret1: sharedSecret,
         counterValue1: counterValue,
-        recAdd1: recAdd,
+        senderAdd1: senderAdd,
         expDestKeyPair1: expDestKeyPair
       }
       // Data encryption begins.

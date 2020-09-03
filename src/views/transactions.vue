@@ -35,7 +35,7 @@
                     <el-form-item label="Sender" prop="senderAdd">
                       <el-input v-model="receivedTnx.senderAdd" placeholder="Please enter your address." clearable></el-input>
                     </el-form-item>
-                    <el-form-item label="Recipient" prop="recipeintAdd">
+                    <el-form-item label="Recipient's stealth address" prop="recipeintAdd">
                       <el-input v-model="receivedTnx.recipeintAdd" placeholder="Please enter recipient's address." clearable></el-input>
                     </el-form-item>
                     <el-form-item>
@@ -356,88 +356,105 @@ export default {
         console.log('Retrieving user data')
         this.getUserDataLoading = true
         this.encryptedDataLoading = true
-        Myipfs.name.resolve(this.$store.state.IPNShash).then(res => {
-          console.log('IPNS Success!')
-          console.log('IPFS equivalent hash is: ', res.path)
-          // Get the data.
-          Myipfs.cat(res.path).then(retrievedData => {
-            this.$message('Backup data successfully retrieved.')
-            this.tableData[0] = []
-            this.tableData[0].encryptedDataRetrieved = retrievedData.toString('utf8')
-            this.encryptedDataLoading = false
-            this.encryptedData = true
-            // Decrypting the data.
-            this.decryptedDataLoading = true
-            this.$prompt('Getting data from... ' + this.$store.state.IPNShash + ' ...Please enter your decryption key.', 'Information required', {
-              confirmButtonText: 'Continue',
-              cancelButtonText: 'Cancel',
-              inputPlaceholder: 'Enter decryption key.',
-              inputType: 'password'
-            }).then(({ value }) => {
-              symDecrypt(retrievedData.toString('utf8'), value).then(BytesString => {
-                if (Object.keys(BytesString).length !== 0) {
-                  console.log('Decryption successful')
-                  console.log('The BytesString data object: ', BytesString.data)
-                  const arrayBytesString = Object.values(BytesString)
-                  console.log('BytesString as array is: ', arrayBytesString)
-                  // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,senderAdd:senderAdd,expDestKeyPair: expDestKeyPair}
-                  // Testing part retrieval: Receivers
-                  var receivers = Object.keys(BytesString.data).filter(function (k) {
-                    return k.indexOf('recAdd') === 0
-                  }).reduce(function (pulledRecData, k) {
-                    pulledRecData[k] = BytesString.data[k]
-                    return pulledRecData
-                  }, {})
-                  const recArray = Object.values(receivers)
-                  console.log('All receivers as values are: ', recArray)
-                  let combinedKeyPair = ''
-                  // Show decrypted data.
-                  if (Object.keys(BytesString.data).length >= 1) { // Checking for zero data.
-                    for (let i = 1; i < Object.keys(BytesString.data).length / 5; i++) {
-                      this.pageTableData[i] = []
-                      this.pageTableData[i].dataOrCoin = BytesString.data['msg'.concat(i + 1)]
-                      this.pageTableData[i].sharedSecret = BytesString.data['sharedSecret'.concat(i + 1)]
-                      this.pageTableData[i].counter = BytesString.data['counterValue'.concat(i + 1)]
-                      this.pageTableData[i].senderAdd = BytesString.data['senderAdd'.concat(i + 1)]
-                      combinedKeyPair = BytesString.data['expDestKeyPair'.concat(i + 1)]
-                      // Split and destination key pair.
-                      this.pageTableData[i].expDkp = combinedKeyPair[0].substr(0, 7) + ', ' + combinedKeyPair[1].substr(0, 7)
+        // Allow user to enter IPNS hash to mimic typical scanario of loss or theft of device.
+        // However, 'this.$store.state.IPNShash' can be used for store retrieval.
+        this.$prompt('Please enter your IPNS address.', 'Information required for data retrieval', {
+          confirmButtonText: 'Continue',
+          cancelButtonText: 'Cancel',
+          inputPlaceholder: 'IPNS address or hash.',
+          inputPattern: /^Qm[0-9A-Z]{44}$/i
+        }).then(({ value }) => {
+          Myipfs.name.resolve(value).then(res => {
+            console.log('IPNS Success!')
+            console.log('IPFS equivalent hash is: ', res.path)
+            // Get the data.
+            Myipfs.cat(res.path).then(retrievedData => {
+              this.$message('Backup data successfully retrieved.')
+              this.tableData[0] = []
+              this.tableData[0].encryptedDataRetrieved = retrievedData.toString('utf8')
+              this.encryptedDataLoading = false
+              this.encryptedData = true
+              // Decrypting the data.
+              this.decryptedDataLoading = true
+              this.$prompt('Getting data from... ' + value + ' ...Please enter your decryption key.', 'Information required', {
+                confirmButtonText: 'Continue',
+                cancelButtonText: 'Cancel',
+                inputPlaceholder: 'Enter decryption key.',
+                inputType: 'password'
+              }).then(({ value }) => {
+                symDecrypt(retrievedData.toString('utf8'), value).then(BytesString => {
+                  if (Object.keys(BytesString).length !== 0) {
+                    console.log('Decryption successful')
+                    console.log('The BytesString data object: ', BytesString.data)
+                    const arrayBytesString = Object.values(BytesString)
+                    console.log('BytesString as array is: ', arrayBytesString)
+                    // Get all items. Object Structure: {msg:msg, sharedSecret:sharedSecret,counterValue:counterValue,senderAdd:senderAdd,expDestKeyPair: expDestKeyPair}
+                    // Testing part retrieval: Receivers
+                    var receivers = Object.keys(BytesString.data).filter(function (k) {
+                      return k.indexOf('recAdd') === 0
+                    }).reduce(function (pulledRecData, k) {
+                      pulledRecData[k] = BytesString.data[k]
+                      return pulledRecData
+                    }, {})
+                    const recArray = Object.values(receivers)
+                    console.log('All receivers as values are: ', recArray)
+                    let combinedKeyPair = ''
+                    // Show decrypted data.
+                    if (Object.keys(BytesString.data).length >= 1) { // Checking for zero data.
+                      for (let i = 1; i < Object.keys(BytesString.data).length / 5; i++) {
+                        this.pageTableData[i] = []
+                        this.pageTableData[i].dataOrCoin = BytesString.data['msg'.concat(i + 1)]
+                        this.pageTableData[i].sharedSecret = BytesString.data['sharedSecret'.concat(i + 1)]
+                        this.pageTableData[i].counter = BytesString.data['counterValue'.concat(i + 1)]
+                        this.pageTableData[i].senderAdd = BytesString.data['senderAdd'.concat(i + 1)]
+                        combinedKeyPair = BytesString.data['expDestKeyPair'.concat(i + 1)]
+                        // Split and destination key pair.
+                        this.pageTableData[i].expDkp = combinedKeyPair[0].substr(0, 7) + ', ' + combinedKeyPair[1].substr(0, 7)
+                        this.getUserDataLoading = false
+                      }
+                      this.$message({
+                        message: 'Data decryption successful',
+                        type: 'success',
+                        center: true
+                      })
+                      this.decryptedDataLoading = false
+                      this.decryptedData = true
+                      // Set backup retrieved to 1.
+                      this.backupRetrieved = 1
+                    } else {
                       this.getUserDataLoading = false
+                      this.decryptedDataLoading = false
+                      this.$message({
+                        message: 'No backup data found.',
+                        type: 'warning',
+                        center: true
+                      })
                     }
-                    this.$message({
-                      message: 'Data decryption successful',
-                      type: 'success',
-                      center: true
-                    })
-                    this.decryptedDataLoading = false
-                    this.decryptedData = true
-                    // Set backup retrieved to 1.
-                    this.backupRetrieved = 1
-                  } else {
-                    this.getUserDataLoading = false
-                    this.decryptedDataLoading = false
-                    this.$message({
-                      message: 'No backup data found.',
-                      type: 'warning',
-                      center: true
-                    })
                   }
-                }
+                }).catch(err => {
+                  console.log('Error decrypting data', err)
+                  this.getUserDataLoading = false
+                  this.$message.error('Error decrypting data. Wrong decryption key.')
+                })
               }).catch(err => {
-                console.log('Error decrypting data', err)
+                console.log('Cancelled by user', err)
                 this.getUserDataLoading = false
-                this.$message.error('Error decrypting data. Wrong decryption key.')
+                this.$message.error('Decryption key is required.')
               })
             }).catch(err => {
-              console.log('Cancelled by user', err)
+              console.log('Error getting IPFS data', err)
               this.getUserDataLoading = false
-              this.$message.error('Decryption key is required.')
+              this.$message.error('Error getting data from IPFS. Please, try again.')
             })
           }).catch(err => {
-            console.log('Error getting IPFS data', err)
+            console.log('Error resolving IPNS address', err)
             this.getUserDataLoading = false
-            this.$message.error('Error getting data from IPFS. Please, try again.')
+            this.$message.error('Error resolving your IPNS address. Please, try again.')
           })
+        }).catch(err => {
+          console.log('Cancelled by user', err)
+          this.getUserDataLoading = false
+          this.$message.error('Your IPNS address is required. Please, try again.')
         })
       } else {
         this.$message.error('Already displaying retrieved data. Refresh page.')
@@ -461,6 +478,7 @@ export default {
   text-align: left;
 }
 #leftContainer{
+  margin-top: -1.7rem;
   width: 40rem;
   height: 25rem;
 }

@@ -39,7 +39,7 @@
                       <el-input v-model="receivedTnx.recipeintAdd" placeholder="Please enter recipient's address." clearable></el-input>
                     </el-form-item>
                     <el-form-item>
-                    <el-button type="primary" icon="el-icon-coin" :loading="recipientProcessesLoading" @click="submitForm('receivedTnx')">Receive transaction</el-button>
+                    <el-button type="primary" icon="el-icon-coin" v-loading="recipientProcessesLoading" @click="submitForm('receivedTnx')">Receive transaction</el-button>
                       <el-button @click="resetForm('receivedTnx')">Reset</el-button>
                     </el-form-item>
                   </el-col>
@@ -81,10 +81,11 @@
           <el-row>
             <el-col :span="21" :offset="1">
               <div id="decryptedTableDiv" v-if="decryptedData" v-loading="decryptedDataLoading">
+                <h5>Decrypted Data</h5>
                   <el-table
                   :data="pageTableData"
                   style="width: 100%"
-                  height="200px"
+                  height="160px"
                   >
                   <!--Building table body-->
                   <template v-for="(item, index) in decryptedDataTableLabel">
@@ -177,8 +178,8 @@ export default {
     submitForm (formName) {
       if (/^0x[0-9A-F]{5}$/i.test(this.receivedTnx.senderAdd) === true && /^0x[0-9A-F]{5}$/i.test(this.receivedTnx.recipeintAdd) === true) {
         this.$refs[formName].validate(valid => {
-          this.recipientProcessesLoading = true
           if (valid) {
+            this.recipientProcessesLoading = true
             console.log('Form validations passed.')
             var tnxData = {
               msg: this.receivedTnx.msg,
@@ -332,6 +333,7 @@ export default {
         console.log('IPNS Success!')
         const ipnsHash = res.name
         console.log('IPNS address is:', ipnsHash)
+        this.recipientProcessesLoading = false
         this.$alert('Storage on IPFS/IPNS successful. Your IPNS address is ' + ipnsHash, 'Notice on encryption and storage.', {
           confirmButtonText: 'OK',
           callback: action => {

@@ -189,11 +189,13 @@ export default {
             console.log('Received transaction data is: ', tnxData)
             // console.log('Connecting to IPNS using: ', this.$store.state.IPNShash)
             // Get current user IPNS data.
+            console.time('RetrievalTime')
             Myipfs.name.resolve(this.$store.state.IPNShash).then(res => {
               console.log('IPNS Success!')
               console.log('IPFS equivalent hash is: ', res.path)
               // Get the data.
               Myipfs.cat(res.path).then(retrievedData => {
+                console.timeEnd('RetrievalTime')
                 var encryptedUserMobileData = retrievedData.toString('utf8')
                 this.$prompt('Please enter your decryption key.', 'Information required', {
                   confirmButtonText: 'Continue',
@@ -316,10 +318,12 @@ export default {
       console.log('Connecting to IPFS.')
       const MyBuffer = window.Ipfs.Buffer
       var dataToBuffer = MyBuffer.from(encryptedData)
+      console.time('StorageTime')
       Myipfs.add(dataToBuffer).then(res => {
         console.log('Data upload to IPFS sucessful')
         this.loadingData = false
         console.log('IPFS hash is: ', res[0].hash)
+        console.timeEnd('StorageTime')
         this.publishToIPNS(res[0].hash)
       }).catch(err => {
         console.log('Error pushing data to IPFS', err)
